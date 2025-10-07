@@ -1,0 +1,24 @@
+{
+  "name": "agecalculator_cicd",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start":"node src/ageCalculator.js",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dakshhinya/ageCalculator_CICD.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Dakshhinya/ageCalculator_CICD/issues"
+  },
+  "homepage": "https://github.com/Dakshhinya/ageCalculator_CICD#readme",
+  "devDependencies": {
+    "jest": "^30.2.0"
+  }
+}
