@@ -30,7 +30,7 @@ jobs:
       - name: Run tests
         run: npm test
 
-deploy:
+  deploy:    # 👈 Move this under jobs and align with 'test'
     name: Build and Deploy Docs
     needs: test  # only runs if 'test' job passes
     runs-on: [self-hosted, linux]
