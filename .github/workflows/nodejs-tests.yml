@@ -3,16 +3,11 @@ name: Node.js CI & Deploy
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   build_and_test:
+    name: Run Tests
     runs-on: [self-hosted, linux]
-
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x]
 
     steps:
       - name: Checkout repository
@@ -21,40 +16,45 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20.x
 
       - name: Install dependencies
         run: npm install
 
-      - name: Run Jest tests
+      - name: Run tests
         run: npm test
 
-      - name: Build docs
-        run: |
-          chmod +x ./build.sh
-          ./build.sh
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: docs-build
-          path: build/
-
   deploy:
+    name: Deploy Documentation
     needs: build_and_test
     runs-on: [self-hosted, linux]
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          name: docs-build
-          path: build
+          node-version: 20.x
 
-      - name: Deploy
+      - name: Install Insomnia Documenter
+        run: npm install -g insomnia-documenter
+
+      - name: Generate and Deploy Docs
         run: |
-          chmod +x ./deploy.sh
-          ./deploy.sh
+          mkdir -p build
+          cp ./insomnia.json ./build/
+          cd build
+          npx insomnia-documenter --config insomnia.json
+          cp ../insomnia.json ./
+
+          # Backup old version
+          mkdir -p ~/old-build
+          cp -r /data/www/casa-api-docs/* ~/old-build/ || true
+
+          # Deploy new docs
+          sudo rm -rf /data/www/casa-api-docs/*
+          sudo cp -r ./build/* /data/www/casa-api-docs/
+          sudo nginx -t
+          sudo systemctl restart nginx.service
